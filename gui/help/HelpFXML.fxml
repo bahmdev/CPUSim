@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.web.*?>
+
+<BorderPane prefHeight="750.0" prefWidth="850.0" styleClass="root" xmlns:fx="http://javafx.com/fxml">
+  <center>
+    <SplitPane dividerPositions="0.3" focusTraversable="true" prefHeight="160.0" prefWidth="200.0">
+      <items>
+        <!-- Start Tree View -->
+        <TreeView fx:id="treeView" prefHeight="702.0" prefWidth="300.0">
+          <root>
+            <TreeItem expanded="true" value="CPU Sim Help">
+              <children>
+                <TreeItem expanded="true" value="General Help">
+                  <children>
+                    <TreeItem value="Using Help">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Introduction">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="A Tour of CPU Sim">
+                      <children>
+                        <TreeItem value="Part 1: Running CPU Sim">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Part 2: Creating New Machines">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Part 3: Modifying Existing Machines">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                      </children>
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FolderIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                  </children>
+                  <graphic>
+                    <ImageView>
+                      <Image url="@FolderIcon16x16.png" preserveRatio="false" smooth="false" />
+                    </ImageView>
+                  </graphic>
+                </TreeItem>
+                <TreeItem value="Menus">
+                  <children>
+                    <TreeItem value="File Menu">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Edit Menu">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Modify Menu">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Execute Menu">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Help Menu">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                  </children>
+                  <graphic>
+                    <ImageView>
+                      <Image url="@FolderIcon16x16.png" preserveRatio="false" smooth="false" />
+                    </ImageView>
+                  </graphic>
+                </TreeItem>
+                <TreeItem value="Windows">
+                  <children>
+                    <TreeItem value="Desktop Window">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Machine Instruction Dialog">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Machine Instruction Fields Dialog">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Fetch Sequence Dialog">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Hardware Modules Dialog">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Hardware Modules Register Arrays Dialog">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                     </TreeItem>
+                    <TreeItem value="Microinstructions Dialog">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="EQU Editor">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Preferences Dialog">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Options Dialog">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                  </children>
+                  <graphic>
+                    <ImageView>
+                      <Image url="@FolderIcon16x16.png" preserveRatio="false" smooth="false" />
+                    </ImageView>
+                  </graphic>
+                </TreeItem>
+                <TreeItem value="Other Features">
+                  <children>
+                    <TreeItem value="Global EQUs">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Debug Mode">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Keyboard Shortcuts">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                  </children>
+                  <graphic>
+                    <ImageView>
+                      <Image url="@FolderIcon16x16.png" preserveRatio="false" smooth="false" />
+                    </ImageView>
+                  </graphic>
+                </TreeItem>
+                <TreeItem value="Machine Specifications">
+                  <children>
+                    <TreeItem value="Names">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Fetch Sequence">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Machine Instructions">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Fields">
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Hardware Modules">
+                      <children>
+                        <TreeItem value="Registers">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Register Arrays">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="RAMs">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Condition Bits">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                      </children>
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FolderIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Microinstructions">
+                      <children>
+                        <TreeItem value="Arithmetic">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Branch">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Decode">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="End">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Increment">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="IO">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Logical">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="MemoryAccess">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Set">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="SetCondBit">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Shift">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Test">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Transfer">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                      </children>
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FolderIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                    <TreeItem value="Assembly Language">
+                      <children>
+                        <TreeItem value="Syntax">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Regular Instructions">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value=".data Statements">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value=".include Statements">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value=".ascii Statements">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="Macros">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                        <TreeItem value="EQUs">
+                          <graphic>
+                            <ImageView>
+                              <Image url="@FileIcon16x16.png" preserveRatio="false" smooth="false" />
+                            </ImageView>
+                          </graphic>
+                        </TreeItem>
+                      </children>
+                      <graphic>
+                        <ImageView>
+                          <Image url="@FolderIcon16x16.png" preserveRatio="false" smooth="false" />
+                        </ImageView>
+                      </graphic>
+                    </TreeItem>
+                  </children>
+                  <graphic>
+                    <ImageView>
+                      <Image url="@FolderIcon16x16.png" preserveRatio="false" smooth="false" />
+                    </ImageView>
+                  </graphic>
+                </TreeItem>
+              </children>
+              <graphic>
+                <ImageView>
+                  <Image url="@FolderIcon16x16.png" preserveRatio="false" smooth="false" />
+                </ImageView>
+              </graphic>
+            </TreeItem>
+          </root>
+        </TreeView>
+        <WebView fx:id="webView" prefHeight="702.0" prefWidth="500.0" />
+      </items>
+    </SplitPane>
+  </center>
+  <stylesheets>
+    <URL value="@../css/Dialogs.css" />
+  </stylesheets>
+  <top>
+    <HBox id="HBox" alignment="CENTER" prefHeight="46.0" prefWidth="600.0" spacing="10.0">
+      <children>
+        <Button id="previous" fx:id="backButton" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onBackButtonClicked" prefHeight="22.0" prefWidth="80.0" styleClass="roundButton" text="Back" />
+        <Button id="nextButton" fx:id="forwardButton" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onForwardButtonClicked" prefHeight="22.0" prefWidth="80.0" styleClass="roundButton" text="Forward" />
+        <Button fx:id="closeButton" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onCloseButtonClicked" prefHeight="22.0" prefWidth="80.0" styleClass="roundButton" text="Close" />
+        <Label text="Search:">
+          <HBox.margin>
+            <Insets left="10.0" />
+          </HBox.margin>
+        </Label>
+        <TextField fx:id="searchTF" prefWidth="155.0" />
+      </children>
+    </HBox>
+  </top>
+</BorderPane>
