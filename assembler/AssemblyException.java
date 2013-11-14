@@ -124,7 +124,7 @@ public class AssemblyException extends Exception{
 		}
     }
     
-    /** An Exception thrown when an unkown operand is identified. The indicator 
+    /** An Exception thrown when an unknown operand is identified. The indicator
       * "UndefinedOperatorError" is reported with any message given by the Exception.
     **/
     public static class UndefinedOperandError extends AssemblyException{
@@ -140,15 +140,23 @@ public class AssemblyException extends Exception{
       * "InvalidOperandError" is reported with any message given by the Exception.
     **/
     public static class InvalidOperandError extends AssemblyException{
-
+        /** Constructs a new InvalidOperandError.
+         * @param message The notification to be reported when thrown
+         * @param t The Token of code relevant when being reported
+         **/
 		public InvalidOperandError(String message, Token t) {
 			super("InvalidOperandError:\n"+message, t);
 		}
     }
-    
-    
+
+    /** An Exception thrown when an invalid operand is used. The indicator
+      * "InvalidTokenException" is reported with any message given by the Exception.
+    **/
     public static class InvalidTokenException extends AssemblyException{
-    	
+        /** Constructs a new InvalidTokenException.
+         * @param message The notification to be reported when thrown
+         * @param t The Token of code relevant when being reported
+         **/
     	public InvalidTokenException(String message, Token t) {
 			super("InvalidTokenException:\n"+message, t);
 
