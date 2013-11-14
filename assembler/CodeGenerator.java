@@ -79,8 +79,8 @@ public class CodeGenerator
     //			 .data 3 1 [4 2 7] ; same thing as above
     //			 .data 6 2 [4 2 7] ; three 2-cell values of 4, 2, 7
     private void handleData(InstructionCall instructionCall,
-                            List<AssembledInstructionCall> instructionCallList) throws AssemblyException.InvalidOperandError, 
-                            AssemblyException.MemoryError, AssemblyException.SyntaxError, AssemblyException.ValueError
+                List<AssembledInstructionCall> instructionCallList) throws AssemblyException.InvalidOperandError,
+                AssemblyException.MemoryError, AssemblyException.SyntaxError, AssemblyException.ValueError
     {
         int cellSize = machine.getCodeStore().getCellSize(); //num bits per cell
         List operands = instructionCall.operands;
