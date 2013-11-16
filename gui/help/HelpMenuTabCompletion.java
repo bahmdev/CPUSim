@@ -3,6 +3,7 @@ package cpusim.gui.help;
 import javafx.scene.control.TextField;
 import java.util.ArrayList;
 import java.util.List;
+import cpusim.gui.help.HelpController;
 import cpusim.gui.GeneralSuggestionManager;
 
 /**
@@ -19,9 +20,11 @@ public class HelpMenuTabCompletion extends GeneralSuggestionManager{
     public List getData(){
         //data 
         ArrayList<String> list = new ArrayList<String>();
-        list.add("page1");
-        list.add("page2");
-        list.add("page3");
+
+        for (int i=1; i<HelpController.nameURLPairs.length; i++){
+            list.add(HelpController.nameURLPairs[i][0].toLowerCase());
+        }
+
         return list;
 
     }
