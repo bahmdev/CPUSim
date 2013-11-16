@@ -6,7 +6,7 @@ import java.util.List;
 import cpusim.gui.GeneralSuggestionManager;
 
 /**
- * Author: Matthew Levine
+ * Author: Matthew Levine & Bilal Ahmad
  * Date: 11/16/13
  */
 public class HelpMenuTabCompletion extends GeneralSuggestionManager{

@@ -1,7 +1,7 @@
 /**
  * Enhanced Tab
  * @author: Matthew Levine, Bilal Ahmad
- * Last Modified: 11/14/13
+ * Last Modified: 11/15/13
  *
  * The Enhanced Tab class is an extension of the FX Tab class that allows users to type text. The enhancements
  * include text highlighting and tab completion. It abides by the Liskov Substitution principle, i.e, it can be used
