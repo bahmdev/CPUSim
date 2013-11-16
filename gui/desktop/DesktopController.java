@@ -231,7 +231,7 @@ public class DesktopController implements Initializable {
 	 * @param stage    the stage used to display the desktop
 	 */
 	public DesktopController(Mediator mediator, Stage stage) {
-		mediator.setDesktopController(this);
+        mediator.setDesktopController(this);
 		this.stage = stage;
 		this.mediator = mediator;
 		highlightManager = new HighlightManager(mediator, this);
@@ -639,9 +639,11 @@ public class DesktopController implements Initializable {
 	protected void handleUndo(ActionEvent event) {
 		TextArea ta = tabEditorControllers.get(textTabPane.getSelectionModel(
 				).getSelectedItem()).getTextArea();
+
 		TextInputControlBehavior<?> ticb = (TextInputControlBehavior<?>)
 				(((TextInputControlSkin<?, ?>) ta.getSkin()).getBehavior());
 		ticb.callAction("Undo");
+
 	}
 
 	/**
@@ -846,6 +848,8 @@ public class DesktopController implements Initializable {
 	 */
 	@FXML
 	protected void handleFind(ActionEvent event) {
+
+
 		if (findReplaceController == null) {
 			findReplaceController = FindReplaceController.openFindReplaceDialog(mediator, ioConsole.isFocused());
 		} else {
@@ -3289,7 +3293,7 @@ public class DesktopController implements Initializable {
 		Pane dialogRoot = new AnchorPane();
 		Scene dialogScene = new Scene(dialogRoot);
 		dialogStage.setScene(dialogScene);
-		
+
 		TextArea ta = new TextArea();
 		dialogRoot.getChildren().add(ta);
 		dialogStage.initModality(Modality.NONE);

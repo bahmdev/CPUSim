@@ -1,5 +1,9 @@
 package cpusim.gui.help;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.EmptyStackException;
@@ -22,9 +26,21 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.scene.web.HTMLEditor;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.charset.Charset;
+
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.PriorityQueue;
+
+
 
 
 public class HelpController implements Initializable {
@@ -37,11 +53,14 @@ public class HelpController implements Initializable {
 	@FXML private Button forwardButton;
 	@FXML private Button closeButton;
 	@FXML private TextField searchTF;
+
 	
 	public static final String pref = "/cpusim/gui/help/helpHTML";
 	public static final String[][] nameURLPairs = {
-		{"CPU Sim Help",pref+"/CPUSimHelpBlank.html"},
-		
+        {"Search Results", "/cpusim/gui/help/logs/searchResults.html"},
+
+        {"CPU Sim Help",pref+"/CPUSimHelpBlank.html"},
+
 		// General Help Files
 		{"General Help", pref+"/GeneralHelpBlank.html"},
 		{"Using Help", pref+"/generalHelp/usingHelp.html"},
@@ -79,7 +98,7 @@ public class HelpController implements Initializable {
 		{"Global EQUs", pref+"/other/globalEqus.html"},
 		{"Debug Mode", pref+"/other/debugMode.html"},
 		{"Keyboard Shortcuts", pref+"/other/keyboardShortcuts.html"},
-		
+
 		// Machine Specification
 		{"Machine Specifications", pref+"/machineSpecificationsBlank.html"},
 		{"Names", pref+"/specifications/names.html"},
@@ -117,7 +136,9 @@ public class HelpController implements Initializable {
 		{"Macros", pref+"/specifications/assemblyLanguage/macroCalls.html"},
 		{"EQUs", pref+"/specifications/assemblyLanguage/equDeclaration.html"}};
 
-	private Stack<TreeItem<String>> backStack;
+    private static final String searchResultsURL = "/cpusim/gui/help/logs/searchResults.html";
+
+    private Stack<TreeItem<String>> backStack;
 	private Stack<TreeItem<String>> forwardStack;
 	private boolean selectionFromButton;
 	private MultipleSelectionModel<TreeItem<String>> msm;
@@ -128,6 +149,7 @@ public class HelpController implements Initializable {
 	private String appendString;
 	private boolean useAppendString;
 	private DesktopController desktop;
+
 
 	//////////////////// Constructor and Initializer ////////////////////
 	
@@ -182,6 +204,7 @@ public class HelpController implements Initializable {
 		}
 		
 		useAppendString = false;
+
 	}
 	
 	/**
@@ -321,15 +344,24 @@ public class HelpController implements Initializable {
 						if (newState == State.SUCCEEDED) {
 							WebEngine webEngine = webView.getEngine();
 							String s = webEngine.getLocation();
+
+
+                            if (s.substring(s.lastIndexOf("/")+1).equals("searchResults.html"))
+                                return;
+
 							int i = webEngine.getLocation().indexOf(pref);
-							String afterPref = s.substring(i);
+
+                            String afterPref = s.substring(i);
 							if (afterPref.contains("#")) {
 								afterPref = afterPref.substring(0, afterPref.indexOf("#"));
 							}
 							String newItemsName = urls.get(afterPref);
-							
-							TreeItem<String> ti = getItemFromString(newItemsName, treeView.getRoot());
-							if (!previousItem.getValue().equals(ti.getValue())) {
+                            System.out.println(newItemsName);
+                            TreeItem<String> ti = getItemFromString(newItemsName, treeView.getRoot());
+
+                            System.out.println(ti);
+
+                            if (!previousItem.getValue().equals(ti.getValue())) {
 								msm.select(ti);
 							}
 							previousItem = ti;
@@ -352,20 +384,156 @@ public class HelpController implements Initializable {
 		forwardButton.setDisable(true);
 	}
 
+
+    /**
+     *  need to add
+    **/
+    private class SearchResult implements Comparable<SearchResult> {
+        private int keyWordHits;
+        private int titleHits;
+        private String url;
+
+
+        public SearchResult(String url, int keyWordHits, int titleHits){
+            this.url = url;
+            this.keyWordHits = keyWordHits;
+            this.titleHits = titleHits;
+
+        }
+
+        public int getKeyWordHits(){ return keyWordHits; }
+        public int getTitleHits(){ return titleHits; }
+        public String getUrl(){ return url;}
+
+        public int compareTo(SearchResult other){
+            if (titleHits!=0 || other.getTitleHits()!=0)
+                return other.getTitleHits()-titleHits;
+            return other.getKeyWordHits()-keyWordHits;
+        }
+
+        public String toString(){
+            return "Location: "+url+"\nNumber of hits: "+keyWordHits+"\nNumber of hits in title: "+titleHits+"\n";
+        }
+
+    }
+
 	/**
 	 * Initializes the search field.
 	 */
-	public void initializeSeachField() {
+	public void initializeSeachField(){
 		// TODO Implement searching
 		searchTF.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
-				if (event.getCode().equals(KeyCode.ENTER)) {
-					System.out.println("Enter hit from help Search Field.");
+                (new HelpMenuTabCompletion(searchTF)).enableTextProcessing();
+
+
+				if (event.getCode().equals(KeyCode.ENTER) && !searchTF.getText().equals("")) {
+
+                    String searchQuery = searchTF.getText().toLowerCase().replace(" ", "|");
+
+                    String regex = "(^|\\s)"+searchQuery+"\\b";
+                    Pattern keywordPatern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+
+                    PriorityQueue<SearchResult> results = new PriorityQueue<SearchResult>();
+
+                    for (int i=0; i<nameURLPairs.length; i++){
+                        String url = getClass().getResource(nameURLPairs[i][1]).toExternalForm().substring(5);
+                        if (url.substring(url.lastIndexOf("/")+1).equals("searchResults.html"))
+                            continue;
+
+                        List<String> lines = null;
+
+                        try{
+                            lines = Files.readAllLines(Paths.get(url), Charset.defaultCharset());
+                        } catch (IOException e){
+                            continue;
+                        }
+
+                        StringBuilder builder = new StringBuilder();
+
+                        for(String line : lines){
+                            builder.append(line);
+                        }
+
+                        String page = builder.toString();
+                        String title = page.substring(page.toLowerCase().indexOf("<title>")+7,
+                                page.toLowerCase().indexOf("</title>"));
+
+                        Matcher keywordMatcher = keywordPatern.matcher(page);
+                        Matcher titleMatcher = keywordPatern.matcher(title);
+
+
+                        int titleHits = 0;
+                        int keyWordHits = 0;
+
+                        while(titleMatcher.find()){
+                            titleHits++;
+                        }
+
+                        while(keywordMatcher.find()){
+                            keyWordHits++;
+                        }
+
+                        results.add(new SearchResult(url, keyWordHits, titleHits));
+                    }
+
+                    generateSearchResults(results);
+
+                    System.out.println("Enter hit from help Search Field.");
 				}
 			}
 		});
 	}
+
+    private void generateSearchResults(PriorityQueue<SearchResult> results){
+        String head = "<HTML>\n<body>\n"+
+                            "<table>\n" +
+                                "<thead>\n" +
+                                    "<th> <h4> Result Number </h4> </th>\n" +
+                                    "<th></th>\n"+
+                                    "<th> <h4> Link </h4> </th>\n" +
+                                "</thead>\n";
+
+        for (int i=0; i<5; i++){
+            String entryhtml = "";
+            if (results.size()>0){
+                SearchResult entry = results.poll();
+                String fileName = entry.url.substring(entry.url.lastIndexOf("/")+1);
+                entryhtml = "<tr>\n <td> <h4> "+(i+1)+"</h4> </td>\n"+
+                            "<td></td>"+
+                            "<td><h4><a href=\"file://"+entry.getUrl()+"\">"+fileName+"</a></h4></td>\n</tr>";
+            }
+            head = head+entryhtml;
+        }
+
+        String end = "</table> </body> </html>";
+        String html = head + end;
+
+
+        URL url = getClass().getResource(searchResultsURL);
+
+
+
+        try{
+            BufferedWriter writer = new BufferedWriter(new FileWriter(url.toExternalForm().substring(5)+appendString));
+            writer.write(html);
+            writer.close();
+        } catch (IOException e){
+            System.out.println("Failed to update search results");
+        }
+
+
+
+        WebEngine webEngine = webView.getEngine();
+        String s = webEngine.getLocation();
+        if (s.substring(s.lastIndexOf("/")+1).equals("searchResults.html"))
+            webEngine.reload();
+        else
+            webEngine.load(url.toExternalForm()+appendString);
+
+
+    }
 	
 	/**
 	 * Selects the tree item designated by the string.
@@ -431,7 +599,8 @@ public class HelpController implements Initializable {
 	 * contains a value which is the same as the specified string.
 	 */
 	private TreeItem<String> getItemFromString(String s, TreeItem<String> item) {
-		if (item != null && s != null) {
+
+        if (item != null && s != null) {
 			if (item.isLeaf()) {
 				return item.getValue().equals(s) ? item : null;
 			}

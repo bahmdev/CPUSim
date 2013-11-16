@@ -60,8 +60,9 @@ public class FindReplaceController implements Initializable {
 	private boolean searchForward;
 	private boolean capsSensitive;
 	private boolean matchWholeWord;
-	
+
 	private ArrayList<int[]> instances;
+
 
 	private static final char[] WORD_SEPARATORS = {' ', '\t', '\n',
 		'\r', '\f', '.', ',', ':',
@@ -108,6 +109,7 @@ public class FindReplaceController implements Initializable {
 			int pos = Math.min(ta.getCaretPosition(), ta.getAnchor());
 			replaceAnchorToCaretWith(replaceWithTF.getText());
 			ta.positionCaret(pos);
+
 		}
 	}
 	
