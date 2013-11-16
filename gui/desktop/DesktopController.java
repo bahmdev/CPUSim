@@ -102,6 +102,8 @@ import java.util.prefs.Preferences;
 
 /**
  * @author Ben Borchard
+ * @author Bilal Ahmad & Matthew Levin
+ * @modified: 11/15/2013 added 2 methods (tabs)
  */
 public class DesktopController implements Initializable {
 

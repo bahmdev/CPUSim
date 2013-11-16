@@ -42,8 +42,10 @@ import java.util.regex.Matcher;
 import java.util.PriorityQueue;
 
 
-
-
+/**
+ * @author Bilal Ahmad & Mathew Levine
+ * @modified 11/15/2013
+ */
 public class HelpController implements Initializable {
 	
 	//////////////////// Fields ////////////////////
