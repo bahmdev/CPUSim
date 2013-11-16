@@ -1,6 +1,6 @@
 /**
  * Enhanced Tab
- * @author: Matthew Levine, Bilal Ahmad
+ * @author: Matthew Levine & Bilal Ahmad
  * Last Modified: 11/15/13
  *
  * The Enhanced Tab class is an extension of the FX Tab class that allows users to type text. The enhancements

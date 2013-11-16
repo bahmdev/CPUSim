@@ -78,10 +78,14 @@ public class TextHighlightController {
 
     }
 
+    /** Updates all highlights on the textarea
+     * @param me The mouseEvent that associatively calls the method
+     * **/
     public void enableMouseClicks( MouseEvent me ){
         updateHighlights();
     }
 
+    /** Retruns an array of all lines in the textarea **/
     private String[] getAllText( ){
         int savePos = text.getCaretPosition();
         text.end();
