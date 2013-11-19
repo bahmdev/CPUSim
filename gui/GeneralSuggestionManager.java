@@ -1,6 +1,6 @@
 /**
  * Enhanced Tab
- * @author: Matthew Levine & Bilal Ahmad
+ * @author: Matthew Levine, Bilal Ahmad
  * Last Modified: 11/15/13
  *
  * The Enhanced Tab class is an extension of the FX Tab class that allows users to type text. The enhancements
@@ -71,8 +71,16 @@ public abstract class GeneralSuggestionManager {
                 new KeyAction() { public void runKeyAction(KeyEvent car) {actOnSpaceKey(car);}});
         keyToMethodMap.put( "BACK_SPACE",
                 new KeyAction() { public void runKeyAction(KeyEvent car){hidePopup();}});
-        keyToMethodMap.put( "ENTER",
-                new KeyAction() { public void runKeyAction(KeyEvent car){actOnEnterKey(car);}});
+        keyToMethodMap.put("ENTER",
+                new KeyAction() {
+                    public void runKeyAction(KeyEvent car) {
+                        actOnEnterKey(car);
+                    }
+                });
+        keyToMethodMap.put( "DOWN",
+                new KeyAction() { public void runKeyAction(KeyEvent car){actOnUpDown(car);}});
+        keyToMethodMap.put( "UP",
+                new KeyAction() { public void runKeyAction(KeyEvent car){actOnUpDown(car);}});
     }
 
     /**
@@ -141,6 +149,16 @@ public abstract class GeneralSuggestionManager {
 
     }
 
+    /** Allows you to select suggestions with arrow keys if suggestions are avaliable
+     * @param car The character indicating an arrow key
+     */
+    private void actOnUpDown(KeyEvent car) {
+        if ( textSuggestions.length > 0 && textSuggestions[0].isVisible() )
+            return;
+        showCompletions(car);
+    }
+
+
     /**
      * Sets the corrected position of the caret to zero
      * @param car A wrapper for a key press triggering this call. Typically ENTER key
@@ -168,7 +186,7 @@ public abstract class GeneralSuggestionManager {
         if (!car.getEventType().toString().equals( "KEY_RELEASED" ) )
             return;
         //get the current word
-        String curText = getLastWord();
+        String curText = getLastWord().toLowerCase();
 
         int numItems = textSuggestions.length;
         //check if this is the word we checked last time
@@ -187,6 +205,7 @@ public abstract class GeneralSuggestionManager {
 
         keywordSubList.removeAll( removedWords );
 
+        //show the popup menus
         for ( int i = 0; i < numItems; i++ ){
             if ( favoriteWords[i] != ""  && favoriteWords[i] != null ){
                 textSuggestions[i].setVisible(true);
@@ -198,6 +217,7 @@ public abstract class GeneralSuggestionManager {
             }
 
         }
+
     }
 
     /** Delegator methods for modifying two lists in a particular way
@@ -221,8 +241,10 @@ public abstract class GeneralSuggestionManager {
                     if ( usedWords.contains(word) ){ continue; }
                     if (usedWords.contains(favoriteWords[i]))
                         usedWords.remove(favoriteWords[i]);
+                    //check if this word is more favorited than our current guess
                     favoriteWords[i] = favoriteWordUses[i] == 0 ? word :
                             compareTwoWordsByFrequency(word,favoriteWords[i]);
+                    //update the frequency of the favorited word appropriately
                     favoriteWordUses[i] = wordUsageMap.containsKey(favoriteWords[i])
                             ? wordUsageMap.get(favoriteWords[i]) : 0;
 
@@ -252,7 +274,7 @@ public abstract class GeneralSuggestionManager {
             }
         });
 
-        popup.show(text, Side.BOTTOM,0,0);//xoffset*(text.getWidth()/text.getPrefColumnCount()),yoffset);
+        popup.show(text, Side.BOTTOM,0,0);
     }
 
     /**
@@ -271,9 +293,7 @@ public abstract class GeneralSuggestionManager {
      * @param indexOfSugg The index of the suggestion
      */
     private void completeTheWord(KeyEvent car, int indexOfSugg){
-        System.out.println( car );
         if ( car != null ) car.consume();
-
         String word = textSuggestions[indexOfSugg].getText();
         String curPart = getLastWord();
         word = word.replaceFirst(curPart,"");
@@ -293,8 +313,8 @@ public abstract class GeneralSuggestionManager {
 
 
     /**
-     * Compares two words based on their frequency of use by the user. Returns s1 if neither string has
-     * been used.
+     * Compares two words based on their frequency of use by the user.
+     * Returns s1 if neither string has been used.
      * @param s1 The first word
      * @param s2 The second word
      * @return 1 the string used more frequently; tie goes to s1
@@ -302,12 +322,12 @@ public abstract class GeneralSuggestionManager {
     public String compareTwoWordsByFrequency( String s1, String s2){
         if ( wordUsageMap.containsKey(s1) && wordUsageMap.containsKey(s2))
             return wordUsageMap.get( s1 ) >= wordUsageMap.get( s2 ) ? s1 : s2;
-        if ( wordUsageMap.containsKey(s1) ) return s2;
-        return s1;
+        if ( wordUsageMap.containsKey(s1) ) return s1;
+        return s2;
     }
 
     /**
-     * Retrieves the word before the caret. Does not change the position of the carret
+     * Retrieves the word before the caret. Does not change the position of the caret
      * @return The word before the carret.
      */
     public String getLastWord(){
@@ -331,10 +351,12 @@ public abstract class GeneralSuggestionManager {
     /** Sets the internal list of keywords to the Machine's instruction names **/
     public void setKeywordsFromMachine(){
         //this is pretty slow - O(n) for a straightforward retrieval
-        List macInstrs = getData();
-        ArrayList<String> keywordList = new ArrayList<String>(macInstrs.size());
-        for (Object mi : macInstrs ){
-            keywordList.add( mi.toString() );
+        //we should add a listener to the machine, it's a little tricky
+        //though with handling references
+        List rawKeywords = getData();
+        ArrayList<String> keywordList = new ArrayList<String>(rawKeywords.size());
+        for (Object mi : rawKeywords ){
+            keywordList.add( mi.toString().toLowerCase() );
         }
         if ( !keywordCompleteList.equals(keywordList)){
             keywordCompleteList = keywordList;

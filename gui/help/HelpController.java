@@ -60,8 +60,6 @@ public class HelpController implements Initializable {
 	
 	public static final String pref = "/cpusim/gui/help/helpHTML";
 	public static final String[][] nameURLPairs = {
-        {"Search Results", "/cpusim/gui/help/logs/searchResults.html"},
-
         {"CPU Sim Help",pref+"/CPUSimHelpBlank.html"},
 
 		// General Help Files
@@ -139,8 +137,6 @@ public class HelpController implements Initializable {
 		{"Macros", pref+"/specifications/assemblyLanguage/macroCalls.html"},
 		{"EQUs", pref+"/specifications/assemblyLanguage/equDeclaration.html"}};
 
-    private static final String searchResultsURL = "/cpusim/gui/help/logs/searchResults.html";
-
     private Stack<TreeItem<String>> backStack;
 	private Stack<TreeItem<String>> forwardStack;
 	private boolean selectionFromButton;
@@ -152,6 +148,7 @@ public class HelpController implements Initializable {
 	private String appendString;
 	private boolean useAppendString;
 	private DesktopController desktop;
+    private HashMap<String, String> htmlPages;
 
 
 	//////////////////// Constructor and Initializer ////////////////////
@@ -207,6 +204,8 @@ public class HelpController implements Initializable {
 		}
 		
 		useAppendString = false;
+
+        parseHelpHTMLFiles();
 
 	}
 	
@@ -348,11 +347,10 @@ public class HelpController implements Initializable {
 							WebEngine webEngine = webView.getEngine();
 							String s = webEngine.getLocation();
 
-
-                            if (s.substring(s.lastIndexOf("/")+1).equals("searchResults.html"))
-                                return;
-
 							int i = webEngine.getLocation().indexOf(pref);
+
+                            if (i==-1)
+                                return;
 
                             String afterPref = s.substring(i);
 							if (afterPref.contains("#")) {
@@ -386,88 +384,51 @@ public class HelpController implements Initializable {
 
 
     /**
-     *  SearchResult
-     *  @author Bilal Ahmad & Matthew Levine
-     *  last modified: 11/15/2013
-     *
-     *  SearchResult is an innerclass in HelpControler.
-     *  It stores a URL and two associated fields related
-     *  to the number of occurances of a key word in the
-     *  page's title and body.
-     *
+     * Builds map of html files and their corresponding bodies of text
      */
-    private class SearchResult implements Comparable<SearchResult> {
-        private int keyWordHits;
-        private int titleHits;
-        private String url;
+    public void parseHelpHTMLFiles(){
+        //initiate hash map
+        htmlPages = new HashMap<String, String>();
 
+        //parse
+        for (int i=0; i<nameURLPairs.length; i++){
+            String url = getClass().getResource(nameURLPairs[i][1]).toExternalForm().substring(5);
+            // skip if blank page
+            if (url.toLowerCase().contains("blank"))
+                continue;
+            List<String> lines = null;
 
-        /**
-         * Instantiates new SearchResult
-         * @param url the url or uri to the html page
-         * @param keyWordHits the number of hits in the body of the page
-         * @param titleHits the number of hits in the title
-         */
-        public SearchResult(String url, int keyWordHits, int titleHits){
-            this.url = url;
-            this.keyWordHits = keyWordHits;
-            this.titleHits = titleHits;
+            try{
+                lines = Files.readAllLines(Paths.get(url), Charset.defaultCharset());
+            } catch (IOException e){
+                Log.WARNING("Failed to read a file from help menu html pages", e);
+                continue;
+            }
 
+            //read lines
+            StringBuilder builder = new StringBuilder();
+
+            for(String line : lines){
+                builder.append(line);
+            }
+
+            htmlPages.put(url, builder.toString().toLowerCase());
         }
-
-        /**
-         * Returns number of keywords in body
-         * @return keywords in body
-         */
-        public int getKeyWordHits(){ return keyWordHits; }
-
-        /**
-         * Returns number of keywords in title
-         * @return keywrords in title
-         */
-        public int getTitleHits(){ return titleHits; }
-
-        /**
-         * Returns the URL as a string
-         * @return the URL
-         */
-        public String getUrl(){ return url;}
-
-        /**
-         * Compares Search Results based on number of
-         * keywords in the titles, otherwise
-         * defaults to the number of keywords in the body.
-         * @param other other search result
-         * @return result
-         */
-        public int compareTo(SearchResult other){
-            if (titleHits!=0 || other.getTitleHits()!=0)
-                return other.getTitleHits()-titleHits;
-            return other.getKeyWordHits()-keyWordHits;
-        }
-
-        /**
-         * Returns URL and number of keyword hits
-         * @return a string representation
-         */
-        public String toString(){
-            return "Location: "+url+"\nNumber of hits: "+keyWordHits+
-                              "\nNumber of hits in title: "+titleHits+"\n";
-        }
-
     }
 
 	/**
 	 * Initializes the search field.
 	 */
 	public void initializeSeachField(){
+        //used for tab completion
         (new HelpMenuTabCompletion(searchTF)).enableTextProcessing();
 
 		searchTF.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
                 //when enter is pressed and text field is not empty
-				if (event.getCode().equals(KeyCode.ENTER) && !searchTF.getText().equals("")) {
+				if (event.getCode().equals(KeyCode.ENTER) &&
+                                    searchTF.getText().length()>1) {
                     //gets fields and formats them
                     String searchQuery = searchTF.getText().toLowerCase().replace(" ", "|");
                     //regex pattern to look for
@@ -477,32 +438,13 @@ public class HelpController implements Initializable {
                     //prioritized queue of the search results
                     PriorityQueue<SearchResult> results = new PriorityQueue<SearchResult>();
 
-                    //go through all files in help menu
-                    for (int i=0; i<nameURLPairs.length; i++){
-                        String url = getClass().getResource(nameURLPairs[i][1]).toExternalForm().substring(5);
-                        if (url.substring(url.lastIndexOf("/")+1).equals("searchResults.html"))
-                            continue;
 
-                        //read lines
-                        List<String> lines = null;
-
-                        try{
-                            lines = Files.readAllLines(Paths.get(url), Charset.defaultCharset());
-                        } catch (IOException e){
-                            continue;
-                        }
-
-                        //read lines
-                        StringBuilder builder = new StringBuilder();
-
-                        for(String line : lines){
-                            builder.append(line);
-                        }
-                        //page
-                        String page = builder.toString();
+                    for (String url : htmlPages.keySet()){
+                        String page = htmlPages.get(url);
                         //title
                         String title = page.substring(page.toLowerCase().indexOf("<title>")+7,
-                                page.toLowerCase().indexOf("</title>"));
+                                page.toLowerCase().indexOf("</title>")).toLowerCase();
+
                         //keyword matchers
                         Matcher keywordMatcher = keywordPatern.matcher(page);
                         Matcher titleMatcher = keywordPatern.matcher(title);
@@ -519,25 +461,43 @@ public class HelpController implements Initializable {
                             keyWordHits++;
                         }
 
-                        //add result to priority queue
-                        results.add(new SearchResult(url, keyWordHits, titleHits));
+                        //add result to priority queue if there are hits
+                        if (titleHits != 0 || keyWordHits != 0)
+                            results.add(new SearchResult(url, keyWordHits, titleHits));
                     }
 
                     //update webview
                     generateSearchResults(results);
 
-				}
+				} else if (event.getCode().equals(KeyCode.ENTER)) {
+                    WebEngine webEngine = webView.getEngine();
+                    webEngine.loadContent("<html> <body> <p> No Meaningful Results Found"+
+                                          "</p> </body> </html>");
+                }
 			}
 		});
 	}
 
     /**
-     * Updates result page and loads it
+     * Dynamically generates html search result page, building a table with the
+     * the search queries and then updateing the webengine's view.
      * @param results priority queue
      */
     private void generateSearchResults(PriorityQueue<SearchResult> results){
+
+        WebEngine webEngine = webView.getEngine();
+
+
+        if (results.size()==0){
+            webEngine.loadContent("No Meaningful Results Found");
+            return;
+        }
+
+
         //html
-        String head = "<HTML>\n<body>\n"+
+        StringBuilder html = new StringBuilder();
+        html.append( "<HTML>\n" + "<head>   <style type=\"text/css\"> p.p1 {p.p2 }</style> </head>"+
+                        "\n<body BGCOLOR=\"#FFFFFF\">\n"+
                             "<table>\n" +
                                 "<thead>\n" +
                                     "<th> <h4> Result Number </h4> </th>\n" +
@@ -546,7 +506,7 @@ public class HelpController implements Initializable {
                                     "<th></th>\n"+
                                     "<th></th>\n"+
                                     "<th> <h4> Link </h4> </th>\n" +
-                                "</thead>\n";
+                                "</thead>\n");
         //build table dynamically
         for (int i=0; i<6; i++){
             String entryhtml = "";
@@ -560,34 +520,12 @@ public class HelpController implements Initializable {
                             "<td></td>\n"+
                             "<td><h4><a href=\"file://"+entry.getUrl()+"\">"+fileName+"</a></h4></td>\n</tr>";
             }
-            head = head+entryhtml;
+            html.append(entryhtml);
         }
 
-        String end = "</table> </body> </html>";
-        String html = head + end;
+        html.append("</table> </body> </html>");
 
-        //gets url of search page
-        URL url = getClass().getResource(searchResultsURL);
-
-        //writes it to file
-        try{
-            BufferedWriter writer = new BufferedWriter(new FileWriter(url.toExternalForm().substring(5)+appendString));
-            writer.write(html);
-            writer.close();
-        } catch (IOException e){
-            Log.error("Failed to parse Help HTML files.: ", e);
-        }
-
-
-
-
-        //reloads or loads the search page
-        WebEngine webEngine = webView.getEngine();
-        String s = webEngine.getLocation();
-        if (s.substring(s.lastIndexOf("/")+1).equals("searchResults.html"))
-            webEngine.reload();
-        else
-            webEngine.load(url.toExternalForm()+appendString);
+        webEngine.loadContent(html.toString());
 
 
     }
@@ -743,4 +681,78 @@ public class HelpController implements Initializable {
         
         return helpController;
 	}
+
+
+    /**
+     *  SearchResult
+     *  @author Bilal Ahmad & Matthew Levine
+     *  last modified: 11/15/2013
+     *
+     *  SearchResult is an innerclass in HelpControler.
+     *  It stores a URL and two associated fields related
+     *  to the number of occurances of a key word in the
+     *  page's title and body.
+     *
+     */
+    private class SearchResult implements Comparable<SearchResult> {
+        private int keyWordHits;
+        private int titleHits;
+        private String url;
+
+
+        /**
+         * Instantiates new SearchResult
+         * @param url the url or uri to the html page
+         * @param keyWordHits the number of hits in the body of the page
+         * @param titleHits the number of hits in the title
+         */
+        public SearchResult(String url, int keyWordHits, int titleHits){
+            this.url = url;
+            this.keyWordHits = keyWordHits;
+            this.titleHits = titleHits;
+
+        }
+
+        /**
+         * Returns number of keywords in body
+         * @return keywords in body
+         */
+        public int getKeyWordHits(){ return keyWordHits; }
+
+        /**
+         * Returns number of keywords in title
+         * @return keywrords in title
+         */
+        public int getTitleHits(){ return titleHits; }
+
+        /**
+         * Returns the URL as a string
+         * @return the URL
+         */
+        public String getUrl(){ return url;}
+
+        /**
+         * Compares Search Results based on number of
+         * keywords in the titles, otherwise
+         * defaults to the number of keywords in the body.
+         * @param other other search result
+         * @return result
+         */
+        public int compareTo(SearchResult other){
+            if (titleHits!=0 || other.getTitleHits()!=0)
+                return other.getTitleHits()-titleHits;
+            return other.getKeyWordHits()-keyWordHits;
+        }
+
+        /**
+         * Returns URL and number of keyword hits
+         * @return a string representation
+         */
+        public String toString(){
+            return "Location: "+url+"\nNumber of hits: "+keyWordHits+
+                    "\nNumber of hits in title: "+titleHits+"\n";
+        }
+
+    }
+
 }
