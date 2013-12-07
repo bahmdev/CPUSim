@@ -495,21 +495,18 @@ public class HelpController implements Initializable {
                 "\n<body BGCOLOR=\"#FFFFFF\">\n"+
                 "<table>\n" +
                 "<thead>\n" +
-                "<th> <h4> Result Number </h4> </th>\n" +
+                "<th> <h4> # </h4> </th>\n" +
                 "<th></th>\n"+
                 "<th></th>\n"+
-                "<th></th>\n"+
-                "<th></th>\n"+
-                "<th> <h4> Link </h4> </th>\n" +
+                "<th> <h4> <p> </p> Link </h4> </th>\n" +
                 "</thead>\n");
         //build table dynamically
-        for (int i=0; i<6; i++){
+        for (int i=0; i<10; i++){
             String entryhtml = "";
             if (results.size()>0){
                 SearchResult entry = results.poll();
                 String fileName = entry.url.substring(entry.url.lastIndexOf("/")+1);
                 entryhtml = "<tr>\n <td> <h4> "+(i+1)+"</h4> </td>\n"+
-                        "<td></td>\n"+
                         "<td></td>\n"+
                         "<td></td>\n"+
                         "<td></td>\n"+
