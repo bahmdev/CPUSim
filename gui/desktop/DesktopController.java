@@ -67,7 +67,7 @@ import cpusim.gui.equs.EQUsController;
 import cpusim.gui.fetchsequence.EditFetchSequenceController;
 import cpusim.gui.find.FindReplaceController;
 import cpusim.gui.help.HelpController;
-import cpusim.gui.help.Logs.Log;
+import cpusim.logs.Log;
 import cpusim.gui.options.OptionsController;
 import cpusim.gui.preferences.PreferencesController;
 import cpusim.microinstruction.IO;

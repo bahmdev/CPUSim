@@ -1,9 +1,5 @@
 package cpusim.gui.help;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.EmptyStackException;
@@ -12,7 +8,7 @@ import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Stack;
 import cpusim.gui.desktop.DesktopController;
-import cpusim.gui.help.Logs.Log;
+import cpusim.logs.Log;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker.State;
@@ -27,7 +23,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import javafx.scene.web.HTMLEditor;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -43,8 +38,8 @@ import java.util.PriorityQueue;
 
 
 /**
- * @author Bilal Ahmad & Mathew Levine
- * @modified 11/15/2013
+ * @author Mathew Levine & Bilal Ahmad
+ * @modified 12/06/2013
  */
 public class HelpController implements Initializable {
 

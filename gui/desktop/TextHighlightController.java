@@ -3,15 +3,12 @@ package cpusim.gui.desktop;
 import cpusim.Mediator;
 import cpusim.gui.TextAreaEnhancer;
 import cpusim.gui.TextEnhancement;
-import cpusim.gui.help.Logs.Log;
+import cpusim.logs.Log;
 
-import javafx.event.EventHandler;
-import javafx.geometry.Orientation;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.effect.BlendMode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -318,13 +315,12 @@ public class TextHighlightController implements TextEnhancement{
      */
     @Override
     public boolean isTextArea( TextArea text ){
-        return this.text.equals(text);
+        return this.text.hashCode() == text.hashCode(); //equals doesn't guarantee uniqueness
     }
 
     /** Preprocesses the enhancemen before entering a loop of the textarea **/
     @Override
     public void preProcess(){
-
         removeAllHighlights();
         updateColors();
     }
@@ -371,7 +367,6 @@ public class TextHighlightController implements TextEnhancement{
      **/
     public boolean mutateWord( String word, String line,  int literalCol, int row,
                                boolean isCaretWord ){
-
         if (!isEnabled()) return false;
         int caretCol;
         //get the comment symbol
@@ -380,30 +375,24 @@ public class TextHighlightController implements TextEnhancement{
             caretCol = line.indexOf(word,literalCol);
 
             commentString(caretCol+word.indexOf(comSymb)+1,row);
-            System.out.println(highlights.limboRectangles.size());
-            System.out.println(highlights.useddRectangles.size());
-            System.out.println("-----");
-            //return true;
+            return true;
         }
+        //if it's a keyword, get the screen coords and highlight; could make the
+        // map text coords->screen coords vary by font, but hardcoded for now
+        if ( isKeyword(word.replace(comSymb, "")) ||
+                (word.endsWith(":") && literalCol == 0) ){
+            caretCol = line.indexOf(word,literalCol);
+            int fontSize = getFontSize();
+            double scrlX = text.getScrollLeft()*1.11;
+            double scrlY = text.getScrollTop()/1.008/(getFontCorrection());
 
-
-//        //if it's a keyword, get the screen coords and highlight; could make the
-//        // map text coords->screen coords vary by font, but hardcoded for now
-//        if ( isKeyword(word.replace(comSymb, "")) ||
-//                (word.endsWith(":") && literalCol == 0) ){
-//            caretCol = line.indexOf(word,literalCol);
-//            int fontSize = getFontSize();
-//            double scrlX = text.getScrollLeft()*1.11;
-//            double scrlY = text.getScrollTop()/1.008/(getFontCorrection());
-//
-//            addHighlight((int) (0.9 * ((caretCol * fontSize / 12.0 + 1) * 8.0 + 22.5 - scrlX)),
-//                    (int) (row * 13.5 * fontSize / 12.0 - scrlY), word.length());
-//            //labels
-//            if (word.endsWith(":") && literalCol == 0)
-//                highlights.peek().setBlendMode(labelColor);
-//        }
-//
-       return false;
+            addHighlight((int) (0.9 * ((caretCol * fontSize / 12.0 + 1) * 8.0 + 22.5 - scrlX)),
+                    (int) (row * 13.5 * fontSize / 12.0 - scrlY), word.length());
+            //labels
+            if (word.endsWith(":") && literalCol == 0)
+                highlights.peek().setBlendMode(labelColor);
+        }
+        return false;
     }
 
     /** Returns whether the area is enabled **/
@@ -416,10 +405,10 @@ public class TextHighlightController implements TextEnhancement{
         return TextAreaEnhancer.Enhancement.HIGHLIGHTING; }
 
     /** Warps the Enhancement along the specifications of
-     * TextAreaEnhancer.
+     * TextAreaEnhancer. Not implemented; not necessary.
      */
     @Override public void warp(){
-        return;//FIXME: for all those fancy specifications I kinda flail here
+        return; //not implemented
     }
 
     /** Storage bank for highlights **/

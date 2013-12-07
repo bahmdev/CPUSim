@@ -35,7 +35,9 @@ import java.util.ResourceBundle;
  * The controller for the Preferences Dialog.
  */
 
-//Matthew Levine 12/01/2013 added text enhancement updates to apply button
+
+
+//Matthew Levine & Bilal Ahmad - 12/06/2013 added text enhancement updates to apply button
 
 public class PreferencesController implements Initializable {
     @FXML ComboBox<String> assemblyWindowFont;
