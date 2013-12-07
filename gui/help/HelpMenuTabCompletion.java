@@ -14,7 +14,7 @@ public class HelpMenuTabCompletion extends GeneralSuggestionManager{
 
 
     public HelpMenuTabCompletion(TextField textField){
-        initUtilityFields(textField);
+        super(textField);
     }
 
     public List getData(){

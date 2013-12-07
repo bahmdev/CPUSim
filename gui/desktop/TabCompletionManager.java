@@ -16,7 +16,7 @@ public class TabCompletionManager extends GeneralSuggestionManager {
     private Mediator source;
 
     public TabCompletionManager( TextArea textarea, Mediator mediator ){
-        initUtilityFields(textarea);
+        super(textarea);
         source = mediator;
     }
 

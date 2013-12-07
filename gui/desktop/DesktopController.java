@@ -57,6 +57,7 @@ import com.sun.javafx.scene.control.behavior.TextInputControlBehavior;
 import com.sun.javafx.scene.control.skin.TextInputControlSkin;
 import cpusim.*;
 import cpusim.assembler.Token;
+import cpusim.gui.TextAreaEnhancer;
 import cpusim.gui.about.AboutController;
 import cpusim.gui.desktop.editorpane.EditorPaneController;
 import cpusim.gui.editmachineinstruction.EditMachineInstructionController;
@@ -66,6 +67,7 @@ import cpusim.gui.equs.EQUsController;
 import cpusim.gui.fetchsequence.EditFetchSequenceController;
 import cpusim.gui.find.FindReplaceController;
 import cpusim.gui.help.HelpController;
+import cpusim.gui.help.Logs.Log;
 import cpusim.gui.options.OptionsController;
 import cpusim.gui.preferences.PreferencesController;
 import cpusim.microinstruction.IO;
@@ -228,6 +230,23 @@ public class DesktopController implements Initializable {
 
     private RowHeightController rowHeightController;
 
+    //Matthew Levine added 11/26/2013 Handles TextArea Enhancements
+    public final TextAreaEnhancer textAreaEnhancer;
+    //Matthew Levine added 12/2/2013 Handles Color Schemes in preference window
+    public String colorScheme;
+    private static String[][] colorSchemeIDs = { {"#4d1a4d","white"}, {"white","black"},
+            {"#cc3333","#666666"},{"#ffff4d","#1a4d1a"},{"#b3b3b3","#001a80"},
+            {"#ffcc66","#5D8AA8"},{"#1a3399","#BE0032"} };
+    public final static HashMap<String,String[]> colorSchemeMap = new HashMap<String, String[]>(){{
+        put("Boring", colorSchemeIDs[0] );
+        put("Hacker", colorSchemeIDs[1] );
+        put("Molten", colorSchemeIDs[2] );
+        put("Candy", colorSchemeIDs[3] );
+        put("Cool", colorSchemeIDs[4] );
+        put("Subtle", colorSchemeIDs[5] );
+        put("Crimson", colorSchemeIDs[6] );
+    }};
+
     /**
      * constructor method that takes in a mediator and a stage
      *
@@ -241,6 +260,9 @@ public class DesktopController implements Initializable {
         this.mediator = mediator;
         highlightManager = new HighlightManager(mediator, this);
         updateDisplayManager = new UpdateDisplayManager(mediator, this);
+        //Matthew Levine added 11/26/2013 Instantiate textarea enhancer
+        textAreaEnhancer = new TextAreaEnhancer();
+        colorScheme = "None";
     }
 
     /**
@@ -1208,11 +1230,10 @@ public class DesktopController implements Initializable {
         newtab.setContent(dialogRoot);
         controller.getTextArea().setText(content);
 
-        //Matthew Levine: 11/14/2013 Enable Tab Completion & Text Highlighting
-        new TabCompletionManager(controller.getTextArea(),
-                mediator).enableTextProcessing();
-        new TextHighlightController(controller.getTextArea(),
-                mediator).enableHighlighting();
+        //Matthew Levine: 11/26/2013 Enable Tab Completion & Text Highlighting
+        textAreaEnhancer.enhance(controller.getTextArea(),mediator,
+                TextAreaEnhancer.Enhancement.HIGHLIGHTING,
+                TextAreaEnhancer.Enhancement.TAB_COMPLETION);
 
         addTextAreaChangeListener(controller.getTextArea());
 
@@ -1276,11 +1297,26 @@ public class DesktopController implements Initializable {
                 }
             }
         });
+
+        final SimpleStringProperty newName = new SimpleStringProperty(title);
+
+        MenuItem popOut = new MenuItem("Pop Out");
+        final TextArea control = controller.getTextArea();
+        final EditorPaneController finalController = controller;
+        popOut.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+                PopupManager popup = new PopupManager(control,getStage(),finalController,mediator);
+                popup.show();
+                popup.title(newName);
+                closeTab(newtab,true);
+            }
+        });
+
         copyPath.disableProperty().bind(
                 newtab.tooltipProperty().get().textProperty().isEqualTo("File has not been saved."));
 
         ContextMenu cm = new ContextMenu();
-        cm.getItems().addAll(close, closeAll, closeOthers, copyPath);
+        cm.getItems().addAll(close, closeAll, closeOthers, copyPath, popOut);
         newtab.setContextMenu(cm);
 
         SimpleBooleanProperty bool = new SimpleBooleanProperty(false);
@@ -1293,7 +1329,6 @@ public class DesktopController implements Initializable {
             }
         });
 
-        SimpleStringProperty newName = new SimpleStringProperty(title);
 
         tabFiles.put(newtab, file);
         tabsDirty.put(newtab, bool);
@@ -1988,7 +2023,7 @@ public class DesktopController implements Initializable {
         try {
             dialogRoot = (Pane) fxmlLoader.load();
         } catch (IOException e) {
-            //TODO: something...
+            Log.WARNING("Unable to load dialog root pane in DesktopController",e);
         }
         Scene dialogScene = new Scene(dialogRoot);
         dialogStage.setScene(dialogScene);
@@ -2054,9 +2089,7 @@ public class DesktopController implements Initializable {
 
             return content;
         } catch (IOException ioe) {
-            //TODO: something...
-            System.out.println("IO fail");
-
+            Log.WARNING("IO Failed extracting text from file",ioe);
         }
         return null;
 
@@ -2083,6 +2116,7 @@ public class DesktopController implements Initializable {
             return true;
         } catch (IOException ioe) {
             Dialogs.showErrorDialog(stage, "Unable to save the text to a file.", "Error", "CPU Sim");
+            Log.WARNING("Unable to save the text to a file.",ioe);
             return false;
         }
     }
@@ -2565,7 +2599,7 @@ public class DesktopController implements Initializable {
                 try {
                     registerArrayTableRoot = (Pane) registerArrayFxmlLoader.load();
                 } catch (IOException e) {
-                    //TODO: something...
+                    Log.WARNING("IO On Register array pane failed",e);
                 }
                 registerArrayTableController.setDataBase(regDataBase);
 
@@ -2678,7 +2712,7 @@ public class DesktopController implements Initializable {
                 try {
                     registerArrayTableRoot = (Pane) registerArrayFxmlLoader.load();
                 } catch (IOException e) {
-                    //TODO: something...
+                    Log.WARNING("IO on Register array pane failed",e);
                 }
                 registerArrayTableController.setDataBase(regDataBase);
 
@@ -2720,7 +2754,7 @@ public class DesktopController implements Initializable {
                 try {
                     ramTableRoot = (Pane) ramFxmlLoader.load();
                 } catch (IOException e) {
-                    //TODO: something...
+                    Log.WARNING("IO on RAM table pane failed",e);
                 }
 
                 ramTableController.setDataBase(ramDataBase);
@@ -2862,6 +2896,8 @@ public class DesktopController implements Initializable {
 
         prefs.putBoolean("autoSave", otherSettings.autoSave);
         prefs.putBoolean("showLineNumbers", otherSettings.showLineNumbers.get());
+        prefs.putBoolean("completeTabs", otherSettings.completeTabs.get());
+        prefs.putBoolean("highlightText", otherSettings.highlightText.get());
 
         for (String font : rowHeightController.fonts) {
             for (int size : rowHeightController.sizes) {
@@ -2924,6 +2960,8 @@ public class DesktopController implements Initializable {
 
         otherSettings.autoSave = prefs.getBoolean("autoSave", false);
         otherSettings.showLineNumbers.set(prefs.getBoolean("showLineNumbers", true));
+        otherSettings.completeTabs.set(prefs.getBoolean("completeTabs", true));
+        otherSettings.highlightText.set(prefs.getBoolean("highlightText", true));
 
         for (String font : rowHeightController.fonts) {
             for (int size : rowHeightController.sizes) {
@@ -3272,9 +3310,13 @@ public class DesktopController implements Initializable {
     public class OtherSettings {
         public boolean autoSave;
         public SimpleBooleanProperty showLineNumbers;
+        public SimpleBooleanProperty completeTabs;
+        public SimpleBooleanProperty highlightText;
 
         public OtherSettings() {
             showLineNumbers = new SimpleBooleanProperty(true);
+            completeTabs = new SimpleBooleanProperty(true);
+            highlightText = new SimpleBooleanProperty(true);
             showLineNumbers.addListener(new ChangeListener<Boolean>() {
                 @Override
                 public void changed(ObservableValue<? extends Boolean> arg0,
@@ -3292,6 +3334,26 @@ public class DesktopController implements Initializable {
                             }
                         }
                     }
+                }
+            });
+            //Matthew Levine: 12/2/2013: Enable/Disable tab completion
+            completeTabs.addListener(new ChangeListener<Boolean>() {
+                @Override
+                public void changed(ObservableValue<? extends Boolean> arg0,
+                                    Boolean oldVal, Boolean newVal) {
+                    textAreaEnhancer.configureAll(
+                            TextAreaEnhancer.Enhancement.TAB_COMPLETION,
+                            completeTabs.getValue());
+                }
+            });
+            //Matthew Levine: 12/2/2013: Enable/Disable text highlighting
+            highlightText.addListener(new ChangeListener<Boolean>() {
+                @Override
+                public void changed(ObservableValue<? extends Boolean> arg0,
+                                    Boolean oldVal, Boolean newVal) {
+                    textAreaEnhancer.configureAll(
+                            TextAreaEnhancer.Enhancement.HIGHLIGHTING,
+                            highlightText.getValue());
                 }
             });
         }

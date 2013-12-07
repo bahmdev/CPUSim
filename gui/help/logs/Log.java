@@ -1,4 +1,4 @@
-package cpusim.gui.help.logs;
+package cpusim.gui.help.Logs;
 
 import java.io.StringWriter;
 import java.io.PrintWriter;
@@ -75,7 +75,7 @@ public class Log {
 
 
     /**
-     * Logger is used to execute the logs
+     * Logger is used to execute the Logs
      */
     private static class Logger{
 
@@ -116,7 +116,7 @@ public class Log {
             String url = Log.class.getProtectionDomain().getCodeSource().getLocation().toExternalForm();
 
             try {
-                PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(url.substring(5)+"cpusim/gui/help/logs/log.txt", true)));
+                PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(url.substring(5)+ "cpusim/gui/help/Logs/log.txt", true)));
                 out.println("\n"+builder.toString());
                 out.close();
             } catch (IOException ieo) {

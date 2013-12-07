@@ -16,10 +16,11 @@ import javafx.event.EventHandler;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
+import javafx.scene.layout.GridPane;
 
 import java.util.*;
 
-public abstract class GeneralSuggestionManager {
+public abstract class GeneralSuggestionManager implements TextEnhancement{
     /** The TextArea to modfiy **/
     private TextInputControl text;
     /** The map of keywords **/
@@ -41,10 +42,24 @@ public abstract class GeneralSuggestionManager {
 
     private int caretPositionX;
 
+    /** The true position of the current word **/
+    private int[] wordPosition;
+
+    /** A delay flag **/
+    private boolean isReady;
+
+    /** Cheap flag for disabling tab completion **/
+    private boolean isConfigured;
+
+    /** Returns the enhancement type of the manager **/
+    @Override
+    public TextAreaEnhancer.Enhancement getEnhancementType(){
+        return TextAreaEnhancer.Enhancement.TAB_COMPLETION; }
+
     /** Instantiates utility fields that are not accessible externally.
      * @param textarea  The textarea to consider input from
      */
-    public void initUtilityFields(TextInputControl textarea){
+    public GeneralSuggestionManager(TextInputControl textarea){
         int numberOfTextSuggestions = 4;
 
         //instantiate fundamental fields
@@ -59,6 +74,8 @@ public abstract class GeneralSuggestionManager {
 
         keywordCompleteList = new ArrayList<String>();
         keywordSubList = new ArrayList<String>( keywordCompleteList );
+
+        wordPosition = new int[2];
     }
 
     /** Builds an internal map of functions associated with each keypress. **/
@@ -70,7 +87,7 @@ public abstract class GeneralSuggestionManager {
         keyToMethodMap.put( "SPACE",
                 new KeyAction() { public void runKeyAction(KeyEvent car) {actOnSpaceKey(car);}});
         keyToMethodMap.put( "BACK_SPACE",
-                new KeyAction() { public void runKeyAction(KeyEvent car){hidePopup();}});
+                new KeyAction() { public void runKeyAction(KeyEvent car){hidePopup(); }});
         keyToMethodMap.put("ENTER",
                 new KeyAction() {
                     public void runKeyAction(KeyEvent car) {
@@ -86,20 +103,29 @@ public abstract class GeneralSuggestionManager {
     /**
      * Tells the text area to highlight text
      */
-    public void enableTextProcessing(){
+    @Override
+    public void configure(){
         //add manual parse to key presses
         text.addEventFilter(KeyEvent.ANY, new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent car) {
+                if (!isConfigured){
+                    consumeTab(car);
+                    return;
+                }
+
                 setKeywordsFromMachine();
                 onKeyPress(car);
                 if (keyToMethodMap.containsKey(car.getCode().toString())) {
                     keyToMethodMap.get(car.getCode().toString()).runKeyAction(car);
                 } else {
                     hidePopup();
-                    if (car.getCode().isLetterKey())
+                    if (car.getCode().isLetterKey() && //special case cntrl-A
+                            !(car.getCode().toString().equals("A") && car.isControlDown())){
                         showCompletions(car);
+                    }
                 }
+
             }
         });
         //mouse clicks kill tab completion too
@@ -110,6 +136,8 @@ public abstract class GeneralSuggestionManager {
                 caretPositionX = text.getCaretPosition();
             }
         });
+        populateSuggestions();
+        isConfigured = true;
     }
 
     /**
@@ -132,7 +160,8 @@ public abstract class GeneralSuggestionManager {
      */
     public void actOnSpaceKey( KeyEvent car ){
         hidePopup();
-        if ( !car.getEventType().toString().equals( "KEY_RELEASED" ) ) return;
+        if ( isReady == true && !car.getEventType().toString().equals( "KEY_RELEASED" ) )
+            return;
 
         //get the word you just made
         String curText = getLastWord();
@@ -185,6 +214,7 @@ public abstract class GeneralSuggestionManager {
     public void showCompletions( KeyEvent car ) {
         if (!car.getEventType().toString().equals( "KEY_RELEASED" ) )
             return;
+        if (!isConfigured) return;
         //get the current word
         String curText = getLastWord().toLowerCase();
 
@@ -207,7 +237,7 @@ public abstract class GeneralSuggestionManager {
 
         //show the popup menus
         for ( int i = 0; i < numItems; i++ ){
-            if ( favoriteWords[i] != ""  && favoriteWords[i] != null ){
+            if ( !"".equals(favoriteWords[i])  && favoriteWords[i] != null ){
                 textSuggestions[i].setVisible(true);
                 makeSuggestionWindow(favoriteWords[i],
                         caretPositionX, 0, i); //make dropdown for tab completion
@@ -274,7 +304,49 @@ public abstract class GeneralSuggestionManager {
             }
         });
 
-        popup.show(text, Side.BOTTOM,0,0);
+        double[] xyPosition = getScreenXY(text);
+        if (xyPosition == null) return;
+        popup.show(text, Side.BOTTOM, xyPosition[0], xyPosition[1]);
+        popup.setStyle("-fx-background-color: grey;"); //I don't know looks classy
+        popup.setOpacity(.65); //ascetic choice
+    }
+
+    /** Returns a double containing the x,y position that the suggestion window should be
+     * placed. The default is to return 0,0; the window is always drawn from the bottom.
+     * The default is also overloaded for TextArea widgets, which draw beneath the
+     * current word. This method can be overloaded for various control over where the
+     * suggestion appears; dynamic method binding is not supported in full, as the
+     * text widget is always stored at compile time as a TextInputControl, nothing
+     * more specific. Returns null if the position is off the screen.
+     * @param textInputControl The text area whose fields parameterize the decision
+     * @return A double representing the position to place a suggestion
+     */
+    public double[] getScreenXY( TextInputControl textInputControl ){
+        if ( wordPosition[0] < 0 || wordPosition[1] < 0 ) return null;
+        //FIXME: maybe shouldn't use instanceof; better way isn't clear
+        if ( textInputControl instanceof TextArea )
+            return getScreenXY( (TextArea) textInputControl );
+
+        double[] defaultXY = {0,0};
+        return defaultXY;
+    }
+
+    /** Docs required
+     *
+     * @param textArea
+     * @return
+     */
+    private double[] getScreenXY( TextArea textArea ){
+        int fontsize = Integer.valueOf(text.getStyle().toString().split(";")[0].split(":")[1]);
+        double scrlY = textArea.getScrollTop()/1.008;
+        double dScreenHeight = ((GridPane)textArea.getParent()).getHeight()-644.0;
+        double[] defaultXY = {
+                (int)(-fontsize+0.9*((wordPosition[0]*fontsize/12.0+1)*8.0+22.5-
+                        textArea.getScrollLeft()*1.11)), //the xpos
+                ( (GridPane)text.getParent()).getRowConstraints().get(0).getMaxHeight()
+                        +(wordPosition[1]*fontsize*1.13)-620-scrlY-dScreenHeight //the ypos
+        };
+        return defaultXY;
     }
 
     /**
@@ -294,9 +366,9 @@ public abstract class GeneralSuggestionManager {
      */
     private void completeTheWord(KeyEvent car, int indexOfSugg){
         if ( car != null ) car.consume();
-        String word = textSuggestions[indexOfSugg].getText();
-        String curPart = getLastWord();
-        word = word.replaceFirst(curPart,"");
+        String word = textSuggestions[indexOfSugg].getText().toLowerCase();
+        String curPart = getLastWord().toLowerCase();
+        word = word.replaceFirst(curPart,"").toLowerCase();
         int index = caretPositionX;
         text.insertText(index,word);
         hidePopup();
@@ -366,7 +438,95 @@ public abstract class GeneralSuggestionManager {
         }
     }
 
+    /** Increments the internal word frequency database by the frequency of
+     * words in the current document.
+     */
+    public void populateSuggestions(){
+        String[] allText = text.getText().split("\n");
+        //if we hit a comment stop checking; messies up code but is efficient
+        int curValue;
+
+        for ( String line : allText ){
+            String[] wordArray = line.split(" ");
+
+            for ( String word : wordArray ){
+                //process word
+                if (!word.equals("")){
+                    word = word.toLowerCase();
+                    if ( wordUsageMap.containsKey(word) ){
+                        curValue = wordUsageMap.get(word);
+                        wordUsageMap.put(word,curValue+1);
+                    }
+                    else{
+                        wordUsageMap.put(word,1);
+                    }
+                }
+                //move onto next word here
+            }
+            //move onto next line here
+        } //finish looping through the text here
+    }
+
     /** Returns the data to be used for selections **/
     public abstract List getData();
+
+    /** Disables tab completion for the manager **/
+    @Override
+    public void deconfigure(){
+        isConfigured = false;
+    }
+
+    /** Returns whether the area being modified by this enhancement is the given area
+     * @return boolean indicating whether the area being modified by this enhancement is the given area
+     * @param text The text area to check against
+     */
+    @Override
+    public boolean isTextArea( TextArea text ){
+        return this.text.equals(text);
+    }
+
+    /** The tab completion manager does not require preprocessing **/
+    @Override
+    public void preProcess(){  isReady = false; }
+
+    /** The tab completion manager does not require postprocessing **/
+    @Override
+    public void postProcess(){ isReady = true; }
+
+    /**
+     * Attempts to make a suggestion on the word if
+     * @param word The word to act on
+     * @param line The line containing the word
+     * @param literalCol The column index of the word
+     * @param row The row index of the line
+     * @param isCaretWord Flag if the word is the word at the caret
+     * @return whether we should stop looping after seeing this word
+     */
+    @Override
+    public boolean mutateWord( String word, String line,  int literalCol,
+                               int row, boolean isCaretWord ){
+        if (!isCaretWord) return false;
+        wordPosition[0] = literalCol;
+        wordPosition[1] = row;
+        return false;
+    }
+
+    /** Returns whether tab completion is enabled **/
+    @Override public boolean isEnabled(){ return true; }
+
+    /** Warps the Enhancement along the specifications of
+     * TextAreaEnhancer.
+     */
+    @Override public void warp(){
+        wordPosition[0] = -1;
+        wordPosition[1] = -1;
+    }
+
+    /** Consumes the character if it's a TAB key
+     * @param car The key indicating tab-ness
+     */
+    private void consumeTab(KeyEvent car){
+        if (car.getCode().toString().equals("TAB")) car.consume();
+    }
 
 }
